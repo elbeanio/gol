@@ -33,6 +33,7 @@ func main() {
 	sx, sy := io.GetTermSize()
 	frameDelay := 100
 	running := true
+	output := 0
 
 	introScreen(sx, sy)
 	state := game.New(sx, sy, time.Now().UnixNano())
@@ -55,7 +56,12 @@ func main() {
 		// write to screen
 		io.ClearScreen()
 		io.TopLeft()
-		io.PrintGrid(sx, sy, state)
+		switch output {
+		case 0:
+			io.PrintGridBasic(sx, sy, state)
+		case 1:
+			io.PrintGridFade(sx, sy, state)
+		}
 
 		select {
 		case chr := <-input:
@@ -65,6 +71,11 @@ func main() {
 			case '\033':
 				terminal.Restore(0, oldState)
 				os.Exit(0)
+			case 'o':
+				output++
+				if output > 1 {
+					output = 0
+				}
 			case '+':
 				if frameDelay > 10 {
 					frameDelay -= 5

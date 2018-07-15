@@ -58,8 +58,27 @@ func CursorUp(n int) {
 	fmt.Printf("\033[%dA", n-1)
 }
 
-// PrintGrid prints a grid in the terminal
-func PrintGrid(sizeX, sizeY int, g *game.Game) {
+// PrintGridBasic prints a game state with simple true / false values
+func PrintGridBasic(sizeX, sizeY int, g *game.Game) {
+	var buffer bytes.Buffer
+	buffer.Grow(sizeX * sizeY)
+	for y := 0; y < sizeY; y++ {
+		for x := 0; x < sizeX; x++ {
+			pState := g.State[game.Position(sizeX, sizeY, x, y)]
+			if pState == g.StateMax {
+				buffer.WriteString("█")
+			} else {
+				buffer.WriteString(" ")
+			}
+		}
+
+		buffer.WriteString("\n")
+	}
+	fmt.Print(buffer.String())
+}
+
+// PrintGridFade prints a game state where a cell death fades out over a number of states
+func PrintGridFade(sizeX, sizeY int, g *game.Game) {
 	var buffer bytes.Buffer
 	buffer.Grow(sizeX * sizeY)
 	for y := 0; y < sizeY; y++ {
