@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"gol/game"
-	"gol/io"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/elbeanio/gol/game"
+	"github.com/elbeanio/gol/io"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -15,17 +16,18 @@ import (
 func introScreen(w, h int) {
 	io.ClearScreen()
 	io.TopLeft()
-	lines := 7
+	lines := 9
 	boxStart := strings.Repeat(" ", (w-20)/2)
 	fmt.Println(strings.Repeat("\n", (h-lines)/2))
-	fmt.Println(boxStart, "  Game of Life")
-	fmt.Println(boxStart, "--------------------------------")
-	fmt.Println(boxStart, " | q or <esc>: quit           |")
-	fmt.Println(boxStart, " | <space>   : pause          |")
-	fmt.Println(boxStart, " | r         : restart        |")
-	fmt.Println(boxStart, " | o         : change output  |")
-	fmt.Println(boxStart, "--------------------------------")
-	fmt.Println(boxStart, " Press Enter to start")
+	fmt.Println(boxStart, "---------------------------------------")
+	fmt.Println(boxStart, "            Game of Life               ")
+	fmt.Println(boxStart, "---------------------------------------")
+	fmt.Println(boxStart, " | q or <esc>: quit                  | ")
+	fmt.Println(boxStart, " | <space>   : pause                 | ")
+	fmt.Println(boxStart, " | r         : restart               | ")
+	fmt.Println(boxStart, " | o         : change output         | ")
+	fmt.Println(boxStart, "---------------------------------------")
+	fmt.Println(boxStart, "       Press Enter to continue         ")
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
@@ -33,10 +35,9 @@ func main() {
 	sx, sy := io.GetTermSize()
 	frameDelay := 100
 	running := true
-	output := 0
 
 	introScreen(sx, sy)
-	state := game.New(sx, sy, time.Now().UnixNano())
+	state := game.New(sx, sy, frameDelay, time.Now().UnixNano())
 
 	// put term in raw modez
 	oldState, err := terminal.MakeRaw(0)
@@ -56,11 +57,11 @@ func main() {
 		// write to screen
 		io.ClearScreen()
 		io.TopLeft()
-		switch output {
+		switch state.OutputType {
 		case 0:
-			io.PrintGridBasic(sx, sy, state)
+			io.PrintGridBasic(state)
 		case 1:
-			io.PrintGridFade(sx, sy, state)
+			io.PrintGridFade(state)
 		}
 
 		select {
@@ -72,27 +73,27 @@ func main() {
 				terminal.Restore(0, oldState)
 				os.Exit(0)
 			case 'o':
-				output++
-				if output > 1 {
-					output = 0
+				state.OutputType++
+				if state.OutputType > 1 {
+					state.OutputType = 0
 				}
 			case '+':
-				if frameDelay > 10 {
-					frameDelay -= 5
+				if state.FrameDelay > 20 {
+					state.FrameDelay -= 5
 				}
 			case '-':
-				if frameDelay < 100 {
-					frameDelay += 5
+				if state.FrameDelay < 100 {
+					state.FrameDelay += 5
 				}
 			case ' ':
 				running = !running
 			case 'r':
-				state.Init(sx, sy, time.Now().UnixNano())
+				state.Init(time.Now().UnixNano())
 			}
 		default: // empty select default so it doesn't block
 		}
 
 		// TODO turn this into a fixed refresh rate rather than just waiting
-		time.Sleep(time.Duration(frameDelay) * time.Millisecond)
+		time.Sleep(time.Duration(state.FrameDelay) * time.Millisecond)
 	}
 }

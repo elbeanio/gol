@@ -2,9 +2,11 @@ package game
 
 // Game is the state object containing a list of cell states and the number of neighbours for each cell
 type Game struct {
-	width  int
-	height int
+	Width  int
+	Height int
 
+	FrameDelay int
+	OutputType int
 	StateChars [5]string
 	StateMax   int
 	Neighbours []int
@@ -12,23 +14,25 @@ type Game struct {
 }
 
 // New returns a new Game object
-func New(width, height int, seed int64) *Game {
+func New(width, height, frameDelay int, seed int64) *Game {
 	g := new(Game)
 	g.StateChars = [5]string{" ", ".", "o", "O", "@"}
 	g.StateMax = len(g.StateChars) - 1
-	g.Init(width, height, seed)
+	g.FrameDelay = frameDelay
+	g.OutputType = 0
+	g.Width = width
+	g.Height = height
+	g.Init(seed)
 	return g
 }
 
 // Init initialises (or resets) the game state
-func (g *Game) Init(width, height int, seed int64) {
-	g.width = width
-	g.height = height
-	g.State = randomArray(width*height, seed, g.StateMax)
-	g.Neighbours = make([]int, width*height)
-	for y := 0; y < g.height; y++ {
-		for x := 0; x < g.width; x++ {
-			idx := Position(width, height, x, y)
+func (g *Game) Init(seed int64) {
+	g.State = randomArray(g.Width*g.Height, seed, g.StateMax)
+	g.Neighbours = make([]int, g.Width*g.Height)
+	for y := 0; y < g.Height; y++ {
+		for x := 0; x < g.Width; x++ {
+			idx := Position(g.Width, g.Height, x, y)
 			if g.State[idx] == g.StateMax {
 				g.setNeighbours(x, y, g.StateMax)
 			}
@@ -48,7 +52,7 @@ func (g *Game) setNeighbours(x int, y int, state int) {
 				continue
 			}
 
-			idx := ToroidalPosition(g.width, g.height, x+dx, y+dy)
+			idx := ToroidalPosition(g.Width, g.Height, x+dx, y+dy)
 			g.Neighbours[idx] += delta
 		}
 	}
@@ -56,12 +60,12 @@ func (g *Game) setNeighbours(x int, y int, state int) {
 
 // Update moves the game state on
 func (g *Game) Update() {
-	currentN := make([]int, g.width*g.height)
+	currentN := make([]int, g.Width*g.Height)
 	copy(currentN, g.Neighbours)
 
-	for y := 0; y < g.height; y++ {
-		for x := 0; x < g.width; x++ {
-			idx := Position(g.width, g.height, x, y)
+	for y := 0; y < g.Height; y++ {
+		for x := 0; x < g.Width; x++ {
+			idx := Position(g.Width, g.Height, x, y)
 			cs := g.State[idx]
 			ns := cs
 			nn := currentN[idx]

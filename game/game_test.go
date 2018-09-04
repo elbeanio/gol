@@ -5,12 +5,12 @@ import (
 )
 
 func TestNewGame(t *testing.T) {
-	g := New(5, 5, 1)
-	if g.width != 5 {
-		t.Errorf("Expected width of 5, got %d", g.width)
+	g := New(5, 5, 10, 1)
+	if g.Width != 5 {
+		t.Errorf("Expected width of 5, got %d", g.Width)
 	}
-	if g.height != 5 {
-		t.Errorf("Expected height of 5, got %d", g.height)
+	if g.Height != 5 {
+		t.Errorf("Expected height of 5, got %d", g.Height)
 	}
 	if len(g.State) != 25 {
 		t.Errorf("Expected State to be length 25, got %d", len(g.State))
@@ -22,7 +22,7 @@ func TestNewGame(t *testing.T) {
 
 func TestSetNeighbours(t *testing.T) {
 	var seed int64 = 1
-	g := New(5, 5, seed)
+	g := New(5, 5, 10, seed)
 	g.setNeighbours(2, 2, g.StateMax)
 	g.setNeighbours(3, 3, g.StateMax)
 	neighbours := []int{
@@ -43,7 +43,7 @@ func TestSetNeighbours(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	var seed int64 = 1
-	g := New(5, 5, seed)
+	g := New(5, 5, 10, seed)
 	g.Update()
 
 }

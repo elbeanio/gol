@@ -3,11 +3,12 @@ package io
 import (
 	"bytes"
 	"fmt"
-	"gol/game"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/elbeanio/gol/game"
 )
 
 // GetTermSize returns the size of the tty we're running in
@@ -58,36 +59,38 @@ func CursorUp(n int) {
 	fmt.Printf("\033[%dA", n-1)
 }
 
+func printStatusLine(g *game.Game, b *bytes.Buffer, oType string) {
+	b.WriteString(fmt.Sprintf("Output Type: %s        Frame Delay: %d", oType, g.FrameDelay))
+}
+
 // PrintGridBasic prints a game state with simple true / false values
-func PrintGridBasic(sizeX, sizeY int, g *game.Game) {
+func PrintGridBasic(g *game.Game) {
 	var buffer bytes.Buffer
-	buffer.Grow(sizeX * sizeY)
-	for y := 0; y < sizeY; y++ {
-		for x := 0; x < sizeX; x++ {
-			pState := g.State[game.Position(sizeX, sizeY, x, y)]
+	buffer.Grow(g.Width * g.Height)
+	for y := 0; y < g.Height; y++ {
+		for x := 0; x < g.Width; x++ {
+			pState := g.State[game.Position(g.Width, g.Height, x, y)]
 			if pState == g.StateMax {
 				buffer.WriteString("█")
 			} else {
 				buffer.WriteString(" ")
 			}
 		}
-
-		buffer.WriteString("\n")
 	}
+	printStatusLine(g, &buffer, "Basic")
 	fmt.Print(buffer.String())
 }
 
 // PrintGridFade prints a game state where a cell death fades out over a number of states
-func PrintGridFade(sizeX, sizeY int, g *game.Game) {
+func PrintGridFade(g *game.Game) {
 	var buffer bytes.Buffer
-	buffer.Grow(sizeX * sizeY)
-	for y := 0; y < sizeY; y++ {
-		for x := 0; x < sizeX; x++ {
-			pState := g.State[game.Position(sizeX, sizeY, x, y)]
+	buffer.Grow(g.Width * g.Height)
+	for y := 0; y < g.Height; y++ {
+		for x := 0; x < g.Width; x++ {
+			pState := g.State[game.Position(g.Width, g.Height, x, y)]
 			buffer.WriteString(g.StateChars[pState])
 		}
-
-		buffer.WriteString("\n")
 	}
+	printStatusLine(g, &buffer, "Fading")
 	fmt.Print(buffer.String())
 }
