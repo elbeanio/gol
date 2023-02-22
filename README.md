@@ -2,6 +2,8 @@
 
 A terminal-based Game of Life in Go. 
 
+
+
 ```make run``` build and run
 
 ```make test``` run tests

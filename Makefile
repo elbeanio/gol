@@ -8,6 +8,7 @@ BINARY_NAME=bin/gol
 
 all: clean test build
 build: clean test
+	$(GOGET)
 	$(GOBUILD) -o $(BINARY_NAME) -v
 test:
 	$(GOTEST) -v ./...
